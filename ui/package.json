@@ -8,6 +8,8 @@
     "@material-ui/icons": "^4.9.1",
     "classnames": "^2.2.6",
     "clsx": "^1.1.1",
+    "graphology": "^0.21.1",
+    "graphology-layout-forceatlas2": "^0.6.1",
     "graphql": "^14.5.8",
     "moment": "^2.29.1",
     "react": "^17.0.1",
@@ -17,7 +19,9 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "^4.0.2",
     "react-select": "^4.3.1",
+    "react-sigma-v2": "^0.0.8",
     "recharts": "^1.8.5",
+    "sigma": "^2.0.0",
     "vis-react": "^0.5.1"
   },
   "scripts": {

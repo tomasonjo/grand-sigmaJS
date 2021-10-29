@@ -3,55 +3,91 @@ import { gql, useQuery } from "@apollo/client";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Graph from "vis-react";
 
-const NODE_QUERY = gql`
-  query nodes {
-    characters(where: { pagerank_GT: 0.16 }) {
-      name
-      pagerank
-      community
+const HCP_QUERY = gql`
+    query ExampleQuery {
+    hcos(options: { limit: 500, sort: { number_treating: DESC } }) {
+        Name
+        number_treating
+        incoming_referral {
+        Name
+        number_treating
+        }
     }
-  }
+    }
 `;
 
-const REL_QUERY = gql`
-  query rels {
-    interactions {
-      source {
-        name
-      }
-      target {
-        name
-      }
-    }
-  }
-`;
+const nodeCaption = (node) => {
+    console.log(node)
+    let captions = ['name', 'specialty', 'referral_count', 'referring_count'].map((row) => {
+        return `<strong>${row}</strong> ${node[row]}<br>`
+    })
+    console.log(captions.join(""))
+    return captions.join("")
+}
+
+const parseNodes = (data, isIncoming) => {
+    let allNodes = new Set()
+    data.map((el) => {
+        allNodes.add(JSON.stringify({
+            id: el.Name,
+            label: el.Name,
+        //    size: el.referral_count,
+        //    title: nodeCaption(el)
+        }))
+        if (isIncoming) {
+            el.incoming_referral.map((refs) => {
+                allNodes.add(JSON.stringify({
+                    id: refs.Name,
+                    label: refs.Name,
+               //     size: refs.number_treating,
+                   // title: nodeCaption(refs.incoming_referral_hcp)
+                }))
+            })
+        }
+        else {
+
+        }
+    })
+
+    return [...allNodes].map((el) => JSON.parse(el))
+}
+
+const parseRels = (data, isIncoming) => {
+    let allRels = []
+    data.map((el) => {
+        if (isIncoming) {
+            el.incoming_referral.map((refs) => {
+                allRels.push({
+                    from: refs.Name,
+                    to: el.Name
+                })
+            })
+        }
+        else {
+
+        }
+    })
+    
+    return allRels
+}
 
 function Community() {
     // Fetch node and relationship data for our network visualization
-    const { loading: nodeLoading, data: nodeData } = useQuery(NODE_QUERY);
-    const { loading: relLoading, data: relData } = useQuery(REL_QUERY);
+    const { loading: dataLoading, data: hcpData } = useQuery(HCP_QUERY);
     const [graph, setGraph] = useState({ nodes: [], edges: [] });
 
     // Construct a VisJS object based on node and rel graphql responses
     useEffect(() => {
-        if (nodeData && relData) {
+        if (hcpData) {
             setGraph({
-                nodes: nodeData.characters.map((el) => ({
-                    id: el.name,
-                    label: el.name,
-                    group: el.community,
-                    value: el.pagerank,
-                })),
-                edges: relData.interactions.map((el) => ({
-                    from: el.source.name,
-                    to: el.target.name,
-                })),
+                nodes: parseNodes(hcpData.hcos, true),
+                edges: parseRels(hcpData.hcos, true),
                 rand: Math.random().toString(),
             });
         }
-    }, [nodeData, relData]);
+    }, [hcpData]);
 
-    if (nodeLoading || relLoading) {
+    if (dataLoading) {
         return <CircularProgress />;
     }
 
@@ -60,7 +96,7 @@ function Community() {
         edges: {
             arrows: {
                 to: {
-                    enabled: false,
+                    enabled: true,
                 },
             },
             color: {
@@ -76,6 +112,9 @@ function Community() {
                 avoidOverlap: 0.2,
             },
         },
+        layout: {
+            improvedLayout: false
+        }
     };
 
     return (

@@ -1,46 +1,30 @@
-// import character metadata
+// constraints
 
-LOAD CSV WITH HEADERS FROM "file:///characters.csv" as row
-MERGE (c:Character{name:row.title})
-SET c.url = row.url,
-    c.aliases = row.aliases,
-    c.blood = row.blood,
-    c.nationality = row.nationality,
-    c.species = row.species,
-    c.gender = row.gender
-FOREACH (h in CASE WHEN row.house IS NOT NULL THEN [1] ELSE [] END | MERGE (h1:House{name:row.house}) MERGE (c)-[:BELONGS_TO]->(h1))
-FOREACH (l in split(row.loyalty,',') | MERGE (g:Group{name:l}) MERGE (c)-[:LOYAL_TO]->(g))
-FOREACH (f in split(row.family,',') | MERGE (f1:Character{name:f}) MERGE (c)-[t:FAMILY_MEMBER]->(f1));
+CREATE CONSTRAINT ON (h:HCO) ASSERT h.name IS UNIQUE;
 
+// import referral data
 
-// import interactions
+LOAD CSV WITH HEADERS FROM "file:///referral.csv" as row
+WITH row
+LIMIT 10000
 
-LOAD CSV WITH HEADERS FROM "file:///rel_first_seen.csv" as row
-MATCH (s:Character{name:row.source})
-MATCH (t:Character{name:row.target})
-MERGE (s)-[:INTERACTS]->(i:Interaction)-[:INTERACTS]->(t)
-SET i.first_seen = toInteger(row.value);
+WHERE row.REF_HCO_NAME IS NOT NULL AND row.HCO_NAME IS NOT NULL
+// merge referrals
+MERGE (source:HCO {Name:row.REF_HCO_NAME})
+MERGE (target:HCO {Name:row.HCO_NAME})
+MERGE (source)-[:REFERRAL]->(target);
 
-//Run pagerank on interaction network
+// numbers
 
-CALL gds.pageRank.write({
-    nodeQuery:'MATCH (c:Character) RETURN id(c) as id',
-    relationshipQuery:'MATCH (c1:Character)-[:INTERACTS]-()-[:INTERACTS]-(c2:Character)
-                       RETURN id(c1) as source, id(c2) as target',
-    writeProperty:'pagerank'
+LOAD CSV WITH HEADERS FROM "file:///referral.csv" as row
+WITH row
+LIMIT 10000
+WHERE row.REF_HCO_NAME IS NOT NULL AND row.HCO_NAME IS NOT NULL
+MATCH (h:HCO{Name: row.HCO_NAME})
+SET h.number_treating = coalesce(h.number_treating, 0) + toInteger(row.PATIENT_COUNT);
 
-});
+// remaining
 
-// Run Louvain on interaction network
-
-CALL gds.louvain.write({
-    nodeQuery:'MATCH (c:Character) RETURN id(c) as id',
-    relationshipQuery:'MATCH (c1:Character)-[:INTERACTS]-()-[:INTERACTS]-(c2:Character)
-                       RETURN id(c1) as source, id(c2) as target',
-    writeProperty:'community'
-
-});
-
-//Create full text index on Character name property
-
-CREATE FULLTEXT INDEX characterSearch FOR (n:Character) ON EACH [n.name];
+MATCH (h:HCO)
+WHERE NOT EXISTS (h.number_treating)
+SET h.number_treating = 0;

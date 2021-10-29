@@ -149,21 +149,12 @@ export default function App() {
                     </div>
                     <Divider />
                     <List>
-                        <Link to="/" className={classes.navLink}>
-                            <ListItem button>
-                                <ListItemIcon>
-                                    <PeopleIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Exploration" />
-                            </ListItem>
-                        </Link>
-
                         <Link to="/timeline" className={classes.navLink}>
                             <ListItem button>
                                 <ListItemIcon>
                                     <TimelineIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="Timeline" />
+                                <ListItemText primary="SigmaJS" />
                             </ListItem>
                         </Link>
                         <Link to="/community" className={classes.navLink}>
@@ -171,7 +162,7 @@ export default function App() {
                                 <ListItemIcon>
                                     <BlurOnIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="Community" />
+                                <ListItemText primary="VisJS" />
                             </ListItem>
                         </Link>
                     </List>

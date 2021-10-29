@@ -3,3 +3,4 @@ build
 .env
 .vscode
 neo4j/data
+neo4j/import
