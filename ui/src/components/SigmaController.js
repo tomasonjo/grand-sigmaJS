@@ -3,7 +3,6 @@ import { FC, useEffect } from "react";
 import { keyBy, omit } from "lodash";
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 
-
 const SigmaController = ({ dataset, filters }) => {
     const sigma = useSigma();
     const graph = sigma.getGraph();
@@ -17,7 +16,7 @@ const SigmaController = ({ dataset, filters }) => {
         dataset.nodes.forEach((node) =>
             graph.addNode(node.key, { ...node, x: Math.random()*100, y: Math.random()*100 })//, ...omit(clusters[node.cluster], "key"), ...omit(tags[node.tag], "key") }),
         );
-        dataset.edges.forEach(([source, target]) => graph.addEdge(source, target, { size: 1 }));
+        dataset.edges.forEach(([source, target, weight]) => graph.addEdge(source, target, { size: weight / 10 }));
         /*
         // Use degrees as node sizes:
         const degrees = graph.nodes().map((node) => graph.degree(node));
@@ -35,7 +34,7 @@ const SigmaController = ({ dataset, filters }) => {
         */
         // To directly assign the positions to the nodes:
         //const positions = forceAtlas2(graph, {iterations: 50});
-        forceAtlas2.assign(graph, {iterations: 5});
+        //forceAtlas2.assign(graph, {iterations: 5});
        
 
         return null//() => graph.clear();

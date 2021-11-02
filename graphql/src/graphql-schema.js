@@ -1,15 +1,13 @@
 export const typeDefs = `
-type HCO @exclude(operations: [CREATE, UPDATE, DELETE]){
-    Name: String
-    number_treating: Int
-    incoming_referral: [HCO] @relationship(type: "REFERRAL", direction: IN)
-    outgoing_referral: [HCO] @relationship(type: "REFERRAL", direction: OUT)
+type Airport @exclude(operations: [CREATE, UPDATE, DELETE]){
+    name: String
+    pagerank: Float
+    louvain: Int
+    incoming_routes: [Airport] @relationship(type: "ROUTE", properties: "Route", direction: IN)
+    outgoing_routes: [Airport] @relationship(type: "ROUTE", properties: "Route", direction: OUT)
 }
 
-type Query{
-    characterSearch(search: String):[HCO] @cypher(statement:"""
-        CALL db.index.fulltext.queryNodes('HCPSearch', $search + '*') YIELD node
-        RETURN node LIMIT 5
-    """)
+interface Route @relationshipProperties {
+    weight: Float
 }
 `;

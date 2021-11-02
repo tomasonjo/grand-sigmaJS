@@ -3,8 +3,8 @@ services:
   neo4j:
     image: neo4j:4.3.2
     restart: always
-    hostname: neo4j-hospital
-    container_name: neo4j-hospital
+    hostname: neo4j
+    container_name: neo4j
     ports:
       - 7474:7474
       - 7687:7687
@@ -17,9 +17,9 @@ services:
   graphql:
     build:
       context: ./graphql
-    hostname: graphql-hospital
+    hostname: graphql
     restart: always
-    container_name: graphql-hospital
+    container_name: graphql
     ports:
       - 4000:4000
     links:
@@ -30,7 +30,7 @@ services:
       - DEBUG=@neo4j/graphql:*
   ui:
     build: ./ui
-    container_name: ui-hospital
+    container_name: ui-sigma
     ports:
       - 3000:3000
     environment:

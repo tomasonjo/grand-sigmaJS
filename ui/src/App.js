@@ -19,13 +19,7 @@ import {
 } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
-import Timeline from './components/Timeline'
-import Exploration from './components/Exploration'
-import Community from './components/Community'
-
-
-
-
+import SigmaRoot from './components/SigmaRoot'
 
 const drawerWidth = 240
 
@@ -149,20 +143,12 @@ export default function App() {
                     </div>
                     <Divider />
                     <List>
-                        <Link to="/timeline" className={classes.navLink}>
+                        <Link to="/" className={classes.navLink}>
                             <ListItem button>
                                 <ListItemIcon>
                                     <TimelineIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="SigmaJS" />
-                            </ListItem>
-                        </Link>
-                        <Link to="/community" className={classes.navLink}>
-                            <ListItem button>
-                                <ListItemIcon>
-                                    <BlurOnIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="VisJS" />
+                                <ListItemText primary="All routes" />
                             </ListItem>
                         </Link>
                     </List>
@@ -173,9 +159,7 @@ export default function App() {
                     <div className={classes.appBarSpacer} />
                     <Container maxWidth="lg" className={classes.container}>
                         <Switch>
-                            <Route exact path="/" component={Exploration} />
-                            <Route exact path="/timeline" component={Timeline} />
-                            <Route exact path="/community" component={Community} />
+                            <Route exact path="/" component={SigmaRoot} />
                         </Switch>
                     </Container>
                 </main>
