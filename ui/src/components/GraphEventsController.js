@@ -1,5 +1,5 @@
 import { useRegisterEvents, useSigma } from "react-sigma-v2";
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 
 function getMouseLayer() {
   return document.querySelector(".sigma-mouse");
@@ -16,11 +16,12 @@ const GraphEventsController = ({ setHoveredNode }) => {
    */
   useEffect(() => {
     registerEvents({
+      /*
       clickNode({ node }) {
         if (!graph.getNodeAttribute(node, "hidden")) {
           window.open(graph.getNodeAttribute(node, "URL"), "_blank");
         }
-      },
+      },*/
       enterNode({ node }) {
         setHoveredNode(node);
         // TODO: Find a better way to get the DOM mouse layer:

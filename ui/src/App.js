@@ -13,13 +13,13 @@ import {
 } from '@material-ui/core'
 import {
     ChevronLeft as ChevronLeftIcon,
-    People as PeopleIcon,
+    Public as PublicIcon,
     Timeline as TimelineIcon,
-    BlurOn as BlurOnIcon
 } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
-import SigmaRoot from './components/SigmaRoot'
+import SigmaRootForceAtlas from './components/SigmaRootForceAtlas'
+import SigmaRootGeographical from './components/SigmaRootGeographical'
 
 const drawerWidth = 240
 
@@ -148,7 +148,15 @@ export default function App() {
                                 <ListItemIcon>
                                     <TimelineIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="All routes" />
+                                <ListItemText primary="Force Atlas Layout" />
+                            </ListItem>
+                        </Link>
+                        <Link to="/geographical" className={classes.navLink}>
+                            <ListItem button>
+                                <ListItemIcon>
+                                    <PublicIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Geographical layout" />
                             </ListItem>
                         </Link>
                     </List>
@@ -159,7 +167,8 @@ export default function App() {
                     <div className={classes.appBarSpacer} />
                     <Container maxWidth="lg" className={classes.container}>
                         <Switch>
-                            <Route exact path="/" component={SigmaRoot} />
+                            <Route exact path="/" component={SigmaRootForceAtlas} />
+                            <Route exact path="/geographical" component={SigmaRootGeographical} />
                         </Switch>
                     </Container>
                 </main>
