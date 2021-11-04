@@ -29,7 +29,7 @@ const drawHover = (context, data, settings) => {
 
   const label = data.label;
   const subLabel = data.fullName;
-  const clusterLabel = data.country;
+  const clusterLabel = data.tag;
 
   // Then we draw the label background
   context.beginPath();

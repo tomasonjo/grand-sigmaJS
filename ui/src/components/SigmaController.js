@@ -1,7 +1,9 @@
 import { useSigma } from "react-sigma-v2";
 import { useEffect } from "react";
+import { keyBy, omit } from "lodash";
 
-const SigmaController = ({ dataset, geographical }) => {
+
+const SigmaController = ({ dataset, geographical, filters }) => {
   const sigma = useSigma();
   const graph = sigma.getGraph();
 
@@ -35,7 +37,16 @@ const SigmaController = ({ dataset, geographical }) => {
     return null;
   }, [graph, dataset]);
 
-  return null;
+
+
+useEffect(() => {
+  const { tags } = filters;
+  graph.forEachNode((node, { tag }) =>
+    graph.setNodeAttribute(node, "hidden", !tags[tag])
+  );
+}, [graph, filters]);
+
+return null;
 };
 
 export default SigmaController;

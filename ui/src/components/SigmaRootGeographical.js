@@ -1,125 +1,148 @@
 import { React, useState, useEffect } from "react";
 import { gql, useQuery } from "@apollo/client";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import {
-    SigmaContainer,
-} from "react-sigma-v2";
-import SigmaController from "./SigmaController";
-import SigmaNeighborHover from "./SigmaNeighborHover"
-import GraphEventsController from "./GraphEventsController"
+import { ForceAtlasControl, SigmaContainer } from "react-sigma-v2";
 import "react-sigma-v2/lib/react-sigma-v2.css";
-import { Refresh } from "@material-ui/icons";
-import randomColor from 'randomcolor';
+import randomColor from "randomcolor";
+import { keyBy, omit, mapValues , constant} from "lodash";
 
 
+import SigmaController from "./SigmaController";
+import SigmaNeighborHover from "./SigmaNeighborHover";
+import GraphEventsController from "./GraphEventsController";
+import ZoomButtons from "./ZoomButtons";
+import TagsPanel from "./TagsPanel";
 
 const HCP_QUERY = gql`
   query AllRoutes {
-  airports {
-    name
-    pagerank
-    fullName
-    country
-    latitude
-    longitude
-    louvain
-    outgoing_routesConnection {
-      edges {
-        weight
-        node {
-          name
-          pagerank
-          fullName
-          country
-          latitude
-          longitude
-          louvain
+    airports {
+      name
+      pagerank
+      louvain
+      fullName
+      country
+      latitude
+      longitude
+      outgoing_routesConnection {
+        edges {
+          weight
+          node {
+            name
+          }
         }
       }
     }
   }
-  }
 `;
 
 function SigmaRootGeographical() {
-    const { loading, data } = useQuery(HCP_QUERY);
-    const [dataset, setDataset] = useState(null);
-    const [hoveredNode, setHoveredNode] = useState(null);
+  const { loading, data } = useQuery(HCP_QUERY);
+  const [dataset, setDataset] = useState(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [filtersState, setFiltersState] = useState({
+    tags: {},
+  });
 
-    const parseNodes = (data) => {
-        let allNodes = new Set()
-        let allColors = new Object()
-        data.map((el) => {
+  const parseData = (data) => {
+    let allNodes = new Set();
+    let allColors = new Object();
+    let allRels = [];
+    let allCountries = new Set();
 
-            if (!allColors.hasOwnProperty(el.louvain)) {
-                allColors[el.louvain] = randomColor()
-            }
+    data.map((el) => {
+      // define color for louvain cluster
+      if (!allColors.hasOwnProperty(el.louvain)) {
+        allColors[el.louvain] = randomColor();
+      }
+      // add nodes
+      allNodes.add(
+        JSON.stringify({
+          key: el.name,
+          label: el.name,
+          size: el.pagerank,
+          color: allColors[el.louvain],
+          fullName: el.fullName,
+          tag: el.country,
+          latitude: el.latitude,
+          longitude: el.longitude
+        })
+      );
+      // add countries
+      allCountries.add(el.country);
 
-            allNodes.add(JSON.stringify({
-                key: el.name,
-                label: el.name,
-                size: el.pagerank,
-                color: allColors[el.louvain],
-                fullName: el.fullName,
-                country: el.country,
-                latitude: el.latitude,
-                longitude: el.longitude
-            }))
+      el.outgoing_routesConnection.edges.map((refs) => {
+        // add rels
+        allRels.push([el.name, refs.node.name, refs.weight]);
+      });
+    });
 
-            el.outgoing_routesConnection.edges.map((refs) => {
+    // Convert to JSON object from string
+    return {
+      nodes: [...allNodes].map((el) => JSON.parse(el)),
+      rels: allRels,
+      tags: [...allCountries].map((el) => ({ key: el })),
+    };
+  };
 
-                if (!allColors.hasOwnProperty(refs.node.louvain)) {
-                    allColors[refs.node.louvain] = randomColor()
-                }
+  // Construct a VisJS object based on node and rel graphql responses
+  useEffect(() => {
+    if (data) {
+      let parsedData = parseData(data.airports);
+      setDataset({
+        nodes: parsedData["nodes"],
+        edges: parsedData["rels"],
+        tags: parsedData["tags"],
+      });
+      setFiltersState({
+        tags: mapValues(keyBy(parsedData["tags"], "key"), constant(true)),
+      });
+    }
+  }, [data]);
 
-                allNodes.add(JSON.stringify({
-                    key: refs.node.name,
-                    label: refs.node.name,
-                    size: refs.node.pagerank,
-                    color: allColors[refs.node.louvain],
-                    fullName: refs.node.fullName,
-                    country: refs.node.country,
-                    latitude: refs.node.latitude,
-                    longitude: refs.node.longitude
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  return (
+    <SigmaContainer
+      graphOptions={{ type: "directed" }}
+      initialSettings={{
+        defaultEdgeType: "arrow",
+      }}
+      style={{ height: "90vh", width: "100%" }}
+    >
+      <SigmaController dataset={dataset} geographical={true} filters={filtersState}/>
+      <SigmaNeighborHover hoveredNode={hoveredNode} />
+      <GraphEventsController setHoveredNode={setHoveredNode} />
+      {data && dataset && (
+        <div>
+          <div className="controls">
+            <ZoomButtons />
+          </div>
+          <div className="panels">
+            <TagsPanel
+              tags={dataset.tags}
+              filters={filtersState}
+              setTags={(tags) =>
+                setFiltersState((filters) => ({
+                  ...filters,
+                  tags,
                 }))
-            })
-        })
-
-        return [...allNodes].map((el) => JSON.parse(el))
-    }
-
-    const parseRels = (data) => {
-        let allRels = []
-        data.map((el) => {
-            el.outgoing_routesConnection.edges.map((refs) => {
-                allRels.push([el.name, refs.node.name, refs.weight])
-            })
-        })
-
-        return allRels
-    }
-    // Construct a VisJS object based on node and rel graphql responses
-    useEffect(() => {
-        if (data) {
-            setDataset({
-                nodes: parseNodes(data.airports),
-                edges: parseRels(data.airports),
-            });
-        }
-    }, [data]);
-
-    if (loading) {
-        return <CircularProgress />;
-    }
-
-    return (
-        <SigmaContainer
-            style={{ height: "85vh", width: "100%" }}>
-            <SigmaController dataset={dataset} geographical={true} />
-            <SigmaNeighborHover hoveredNode={hoveredNode} />
-            <GraphEventsController setHoveredNode={setHoveredNode} />
-        </SigmaContainer>
-    );
+              }
+              toggleTag={(tag) => {
+                setFiltersState((filters) => ({
+                  ...filters,
+                  tags: filters.tags[tag]
+                    ? omit(filters.tags, tag)
+                    : { ...filters.tags, [tag]: true },
+                }));
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </SigmaContainer>
+  );
 }
 
 export default SigmaRootGeographical;

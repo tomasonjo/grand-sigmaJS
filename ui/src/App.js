@@ -18,6 +18,7 @@ import {
 } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import "./styles.css"
 import SigmaRootForceAtlas from './components/SigmaRootForceAtlas'
 import SigmaRootGeographical from './components/SigmaRootGeographical'
 

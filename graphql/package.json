@@ -1,7 +1,7 @@
 {
-  "name": "hp-viz-graphql",
+  "name": "sigma-viz-graphql",
   "version": "1.0.0",
-  "description": "GraphQL endpoint for hp-viz project",
+  "description": "GraphQL endpoint for grand sigma project",
   "main": "index.js",
   "scripts": {
     "start": "babel-node src/index.js",
