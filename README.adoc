@@ -1,6 +1,7 @@
 # Grand SigmaJS
 
 This project is a demo application for network visualizations using https://www.sigmajs.org/[SigmaJS] and the https://grandstack.io[GRANDstack] (GraphQL, React, Apollo, Neo4j Database) application. SigmaJS can be used to visualize networks with thousands of nodes and relationships.
+The blog posts that describes this project can be found on Medium: https://towardsdatascience.com/grand-sigmajs-c475ec0bde68
 
 The dataset contains flight routes between airports and is based on the https://openflights.org/[Open flights dataset].
 The GraphQL endpoint is using the https://github.com/neo4j/graphql[Neo4j Graphql] library.
